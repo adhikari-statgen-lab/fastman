@@ -14,11 +14,11 @@ An **R package** for fast and efficient visualizing of GWAS results using Q-Q an
 ## Installation
 If you are using Rstudio you can use the following code to install the package.
 ```
-devtools::install_github('kaustubhad/fastman',build_vignettes = TRUE)
+devtools::install_github('adhikari-statgen-lab/fastman',build_vignettes = TRUE)
 ```
 If you are not using Rstudio, we would recommend that you install the package without building the vignette.
 ```
-devtools::install_github('kaustubhad/fastman',build_vignettes = FALSE)
+devtools::install_github('adhikari-statgen-lab/fastman',build_vignettes = FALSE)
 ```
 
 ## Functions:
