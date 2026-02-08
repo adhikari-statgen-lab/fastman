@@ -304,70 +304,68 @@ facy=10/(max(ms$logP)-min(ms$logP)); ms$logP=ms$logP*facy;
 
 # part 3: reduce size for fast plotting --------------------------------------------------------------------------------------------------------------------------------------------
 if (speedup) { # fast method: below 0.2% and above 99.8% round to 3 digits, rest round to 2 digits
-  quants=c(0,0.002,0.5,0.998,1); quants=quantile(ms$logP,quants); # minimum, 0.2th percentile, median, 99.8th percentile and maximum are being calculated
-  right=(quants[5] - quants[4])/(quants[4] - quants[3]); # measure of significance of right tail
-  left=(quants[1] - quants[2])/(quants[2] - quants[3]); # measure of significance of left tail
-  if (nrow(ms)<1E5) { #if there are lest than 100k rows then full data is rounded to 3 digits
+  if (nrow(ms)<1E5 | length(unique(ms$logP))<10) { #if there are lest than 100k rows then full data is rounded to 3 digits
     digs=3; ms$logP=round(ms$logP,digits=digs); ms$BPn=round(ms$BPn,digits=digs); f=duplicated(ms); ms=ms[!f,]; rm(f);
   }
   else { # round lower and upper parts separately
-    if (right>0.1) { # significant right tail
-      if (left>0.1) { # significant left tail
-	    f1=ms$logP<=quants[4]&ms$logP>=quants[2];
-		digs1=2; digs2=3; digs=0*f1 + digs2; digs[f1]=digs1;
-		ms$logP=round(ms$logP,digits=digs); 
-		ms$BPn=round(ms$BPn,digits=digs);
-		rm(digs);
-		f=NULL; #store vector of duplicated rows
-		for (i in 1:numc) {
-			m1=ms[ms$C==i,c("BPn","logP")]; # subset by chromosome for smaller memory
-			f1=duplicated(m1);
-			f=c(f,f1);
-			rm(f1,m1);
-		}
-		ms=ms[!f,]; 
-		rm(f);
-	  }
-	  else { # insignificant left tail
-	    f1=ms$logP<=quants[4];
-		digs1=2; digs2=3; digs=0*f1 + digs2; digs[f1]=digs1;
-		ms$logP=round(ms$logP,digits=digs); 
-		ms$BPn=round(ms$BPn,digits=digs);
-		rm(digs);
-		f=NULL; #store vector of duplicated rows
-		for (i in 1:numc) {
-			m1=ms[ms$C==i,c("BPn","logP")]; # subset by chromosome for smaller memory
-			f1=duplicated(m1);
-			f=c(f,f1);
-			rm(f1,m1);
-		}
-		ms=ms[!f,]; 
-		rm(f);
-	  }
+    quants=c(0,0.002,0.5,0.998,1); quants=quantile(ms$logP,quants); # minimum, 0.2th percentile, median, 99.8th percentile and maximum are being calculated
+    if ((quants[5] - quants[4])>0.1*(quants[4] - quants[3])) { # significant right tail
+      if ((quants[1] - quants[2])>0.1*(quants[2] - quants[3])) { # significant left tail
+        f1=ms$logP<=quants[4]&ms$logP>=quants[2];
+        digs1=2; digs2=3; digs=0*f1 + digs2; digs[f1]=digs1;
+        ms$logP=round(ms$logP,digits=digs); 
+        ms$BPn=round(ms$BPn,digits=digs);
+        rm(digs);
+        f=NULL; #store vector of duplicated rows
+        for (i in 1:numc) {
+          m1=ms[ms$C==i,c("BPn","logP")]; # subset by chromosome for smaller memory
+          f1=duplicated(m1);
+          f=c(f,f1);
+          rm(f1,m1);
+        }
+        ms=ms[!f,]; 
+        rm(f);
+      }
+      else { # insignificant left tail
+        f1=ms$logP<=quants[4];
+        digs1=2; digs2=3; digs=0*f1 + digs2; digs[f1]=digs1;
+        ms$logP=round(ms$logP,digits=digs); 
+        ms$BPn=round(ms$BPn,digits=digs);
+        rm(digs);
+        f=NULL; #store vector of duplicated rows
+        for (i in 1:numc) {
+          m1=ms[ms$C==i,c("BPn","logP")]; # subset by chromosome for smaller memory
+          f1=duplicated(m1);
+          f=c(f,f1);
+          rm(f1,m1);
+        }
+        ms=ms[!f,]; 
+        rm(f);
+      }
     }
     else { # insignificant right tail
-      if (left>0.1) { # significant left tail
-	    f1=ms$logP>=quants[2];
-		digs1=2; digs2=3; digs=0*f1 + digs2; digs[f1]=digs1;
-		ms$logP=round(ms$logP,digits=digs); 
-		ms$BPn=round(ms$BPn,digits=digs);
-		rm(digs);
-		f=NULL; #store vector of duplicated rows
-		for (i in 1:numc) {
-			m1=ms[ms$C==i,c("BPn","logP")]; # subset by chromosome for smaller memory
-			f1=duplicated(m1);
-			f=c(f,f1);
-			rm(f1,m1);
-		}
-		ms=ms[!f,]; 
-		rm(f);
-	  }
-	  else { # insignificant left tail
-	    digs=3;
-		ms$logP=round(ms$logP,digits=digs); 
-		ms$BPn=round(ms$BPn,digits=digs); 
-		f=duplicated(ms); ms=ms[!f,]; rm(f);# as there is no significant tail full data is rounded to 3 digits
-	  }
+      if ((quants[1] - quants[2])>0.1*(quants[2] - quants[3])) { # significant left tail
+        f1=ms$logP>=quants[2];
+        digs1=2; digs2=3; digs=0*f1 + digs2; digs[f1]=digs1;
+        ms$logP=round(ms$logP,digits=digs); 
+        ms$BPn=round(ms$BPn,digits=digs);
+        rm(digs);
+        f=NULL; #store vector of duplicated rows
+        for (i in 1:numc) {
+          m1=ms[ms$C==i,c("BPn","logP")]; # subset by chromosome for smaller memory
+          f1=duplicated(m1);
+          f=c(f,f1);
+          rm(f1,m1);
+        }
+        ms=ms[!f,]; 
+        rm(f);
+      }
+      else { # insignificant left tail
+        digs=3;
+        ms$logP=round(ms$logP,digits=digs); 
+        ms$BPn=round(ms$BPn,digits=digs); 
+        f=duplicated(ms); ms=ms[!f,]; rm(f);# as there is no significant tail full data is rounded to 3 digits
+      }
     }
   }
 }
